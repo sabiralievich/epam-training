@@ -12,9 +12,13 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import heroes.actions.CanFight;
 import heroes.actions.CanMove;
 import heroes.actions.CanTakeDamage;
+import heroes.battle.Cell;
+import heroes.castle.Castle;
+import heroes.player.Player;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
+        "castle",
         "nestHouse",
         "skills",
         "currentEnemy",
@@ -25,21 +29,32 @@ import heroes.actions.CanTakeDamage;
 @Generated("jsonschema2pojo")
 public abstract class Creature implements CanMove, CanFight, CanTakeDamage {
 
-
+    @JsonProperty("castle")
+    private String castle;
     @JsonProperty("nestHouse")
     private String nestHouse;
     @JsonProperty("skills")
     private Skills skills;
     @JsonProperty("currentEnemy")
-    private Object currentEnemy;
+    private Creature currentEnemy;
     @JsonProperty("currentCell")
-    private Object currentCell;
+    private Cell currentCell;
     @JsonProperty("isAlive")
     private Boolean isAlive;
     @JsonProperty("isActive")
     private Boolean isActive;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    @JsonIgnore
+    Player player;
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
 
     @JsonProperty("nestHouse")
     public String getNestHouse() {
@@ -67,7 +82,7 @@ public abstract class Creature implements CanMove, CanFight, CanTakeDamage {
     }
 
     @JsonProperty("currentEnemy")
-    public void setCurrentEnemy(Object currentEnemy) {
+    public void setCurrentEnemy(Creature currentEnemy) {
         this.currentEnemy = currentEnemy;
     }
 
@@ -77,7 +92,7 @@ public abstract class Creature implements CanMove, CanFight, CanTakeDamage {
     }
 
     @JsonProperty("currentCell")
-    public void setCurrentCell(Object currentCell) {
+    public void setCurrentCell(Cell currentCell) {
         this.currentCell = currentCell;
     }
 
