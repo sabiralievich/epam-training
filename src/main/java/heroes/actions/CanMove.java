@@ -1,0 +1,1 @@
+package heroes.actions;public interface CanMove {    int move(int x);}
