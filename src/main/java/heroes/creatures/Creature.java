@@ -2,19 +2,24 @@ package heroes.creatures;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import javax.annotation.processing.Generated;
+
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import heroes.OneDimensionGame;
 import heroes.actions.CanFight;
 import heroes.actions.CanMove;
 import heroes.actions.CanTakeDamage;
+import heroes.battle.BattleField;
 import heroes.battle.Cell;
 import heroes.castle.Castle;
 import heroes.player.Player;
+
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -77,7 +82,7 @@ public abstract class Creature implements CanMove, CanFight, CanTakeDamage {
     }
 
     @JsonProperty("currentEnemy")
-    public Object getCurrentEnemy() {
+    public Creature getCurrentEnemy() {
         return currentEnemy;
     }
 
@@ -87,7 +92,7 @@ public abstract class Creature implements CanMove, CanFight, CanTakeDamage {
     }
 
     @JsonProperty("currentCell")
-    public Object getCurrentCell() {
+    public Cell getCurrentCell() {
         return currentCell;
     }
 
@@ -112,8 +117,13 @@ public abstract class Creature implements CanMove, CanFight, CanTakeDamage {
     }
 
     @JsonProperty("isActive")
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
+    public void activate() {
+        this.isActive = true;
+    }
+
+    @JsonIgnore
+    public void deactivate() {
+        this.isActive = false;
     }
 
     @JsonAnyGetter
@@ -124,5 +134,78 @@ public abstract class Creature implements CanMove, CanFight, CanTakeDamage {
     @JsonAnySetter
     public void setAdditionalProperty(String name, Object value) {
         this.additionalProperties.put(name, value);
+    }
+
+    @Override
+    public int move() {
+        int direction = 0;
+        if (this.player.getId() == 1) direction = 1;
+        if (this.player.getId() == 2) direction = -1;
+        int startPoint = this.getCurrentCell().getX();
+        int endPoint = startPoint + this.getSkills().getSpeed() * direction;
+        Cell busy = null;
+
+        for (int i = this.currentCell.getX() + direction; i != endPoint; i += direction) {
+            if (!BattleField.getInstance().getCells().get(i).isBusy()) {
+                this.getCurrentCell().setFree();
+                this.setCurrentCell(BattleField.getInstance().getCells().get(i));
+                this.getCurrentCell().setBusy();
+                System.out.println("Now I'm standing at cell #" + this.getCurrentCell().getX());
+            } else {
+                System.out.println("Time to fight!");
+
+                break;
+            }
+        }
+
+        return 0;
+    }
+
+    public boolean enemyIsNear() {
+        int direction = 0;
+        if (this.player.getId() == 1) direction = 1;
+        if (this.player.getId() == 2) direction = -1;
+        int currentPosition = this.getCurrentCell().getX();
+        int attackRange = this.getSkills().getAttackRange();
+        int currerntAttackRange = currentPosition + attackRange;
+
+        for (int i = this.currentCell.getX() + direction; i != direction * currerntAttackRange; i += direction) {
+            if(BattleField.getInstance().getCells().get(i).isBusy()) {
+                for(Player player : BattleField.getInstance().getPlayers()) {
+                    for(Creature creature : player.getCreatures()) {
+                        if(creature.getCurrentCell().getX() == BattleField.getInstance().getCells().get(i).getX()){
+                            this.setCurrentEnemy(creature);
+                            creature.setCurrentEnemy(this);
+
+                            return true;
+                        }
+                    }
+                }
+            } else return false;
+        }
+        return false;
+    }
+
+    @Override
+    public int attack() {
+        System.out.println("Attack!");
+        this.getCurrentEnemy().takeDamage(this.getSkills().getDamage());
+        return 0;
+    }
+
+    @Override
+    public int takeDamage(int damage){
+        this.getSkills().setHealth(this.getSkills().getHealth() + this.getSkills().getDefence() - damage);
+        System.out.println("I'm hurt!");
+        if(this.getSkills().getHealth() <= 0) {
+            this.die();
+        }
+        return 0;
+    }
+
+    private void die() {
+        System.out.println("I'm dead..");
+        this.setIsAlive(false);
+        OneDimensionGame.fightStage = false;
     }
 }

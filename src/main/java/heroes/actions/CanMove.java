@@ -1,1 +1,1 @@
-package heroes.actions;public interface CanMove {    int move(int x);}
+package heroes.actions;import heroes.battle.BattleField;public interface CanMove {    int move();}
