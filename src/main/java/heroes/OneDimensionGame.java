@@ -9,16 +9,17 @@ import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OneDimensionGame {
+public class OneDimensionGame extends Thread {
 
-    static BattleField battleField;
+    //static BattleField battleField;
     static Player playerOne;
     static Player playerTwo;
     public static boolean movingStage = true;
     public static boolean fightStage = false;
 
-    public static void placeCreaturesOnBattleField(BattleField battleField) {
-        battleField = battleField;
+   // public static void run(BattleField battleField) {
+   public  void run() {
+        BattleField battleField = BattleField.getInstance();
         playerOne = battleField.getPlayers().get(0);
         playerTwo = battleField.getPlayers().get(1);
 
