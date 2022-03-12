@@ -3,7 +3,6 @@ package heroes.player;
 import heroes.castle.Castle;
 import heroes.creatures.Creature;
 import heroes.creatures.CreatureGenerator;
-
 import java.util.ArrayList;
 import java.util.List;
 

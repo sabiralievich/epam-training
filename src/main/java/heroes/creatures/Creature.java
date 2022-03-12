@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.processing.Generated;
-
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -50,7 +49,7 @@ public abstract class Creature implements CanMove, CanFight, CanTakeDamage {
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
     @JsonIgnore
-    Player player;
+    protected Player player;
 
     public Player getPlayer() {
         return player;
@@ -242,9 +241,9 @@ public abstract class Creature implements CanMove, CanFight, CanTakeDamage {
     private void die() {
         System.out.println("Player " + this.player.getId() + "'s " + this.getClass().getSimpleName() + ": I'm dead..");
         this.setIsAlive(false);
-        OneDimensionGame.fightStage = false;
+        OneDimensionGame.setFightStage(false);
     }
 
 
-    public abstract int superSkillActivate();
+    protected abstract int superSkillActivate();
 }
