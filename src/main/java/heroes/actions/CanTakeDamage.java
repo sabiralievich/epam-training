@@ -1,0 +1,1 @@
+package heroes.actions;public interface CanTakeDamage {    int takeDamage(int resultingDamage);}

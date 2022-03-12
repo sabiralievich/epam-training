@@ -1,0 +1,1 @@
+package heroes.castle;public class NestHouse {    private String type;    public NestHouse(){    }    public NestHouse(String nestType) {        this.type = nestType;    }}
