@@ -1,1 +1,0 @@
-package heroes.actions;import heroes.battle.BattleField;public interface CanMove {    int move();}

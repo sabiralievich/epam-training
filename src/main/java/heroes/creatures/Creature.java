@@ -1,212 +1,187 @@
 package heroes.creatures;
 
+import heroes.Battlefield;
+import heroes.Game;
+
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import javax.annotation.processing.Generated;
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import heroes.OneDimensionGame;
-import heroes.actions.CanFight;
-import heroes.actions.CanMove;
-import heroes.actions.CanTakeDamage;
-import heroes.battle.BattleField;
-import heroes.battle.Cell;
-import heroes.player.Player;
+import java.util.Random;
 
+public abstract class Creature implements Actions {
+    static Random rnd = new Random();
+    Creature currentEnemy;
+    Skills skills;
+    Battlefield.Cell currentCell;
+    int player;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-        "castle",
-        "nestHouse",
-        "skills",
-        "currentEnemy",
-        "currentCell",
-        "isAlive",
-        "isActive"
-})
-@Generated("jsonschema2pojo")
-public abstract class Creature implements CanMove, CanFight, CanTakeDamage {
-
-    @JsonProperty("castle")
-    private String castle;
-    @JsonProperty("nestHouse")
-    private String nestHouse;
-    @JsonProperty("skills")
-    private Skills skills;
-    @JsonProperty("currentEnemy")
-    private Creature currentEnemy;
-    @JsonProperty("currentCell")
-    private Cell currentCell;
-    @JsonProperty("isAlive")
-    private Boolean isAlive;
-    @JsonProperty("isActive")
-    private Boolean isActive;
-    @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
-    @JsonIgnore
-    protected Player player;
-
-    public Player getPlayer() {
-        return player;
+    public Mode getMode() {
+        return mode;
     }
 
-    public void setPlayer(Player player) {
+    public void setMode(Mode mode) {
+        this.mode = mode;
+    }
+
+    protected Mode mode;
+
+    public Creature() {
+    }
+
+    public Creature(int speed, int health, int defence, String damage, int attackRange, int player) {
+        this.skills = new Skills();
+        this.skills.setSpeed(speed);
+        this.skills.setHealth(health);
+        this.skills.setDefence(defence);
+        this.skills.setDamage(damage);
+        this.skills.setAttackRange(attackRange);
         this.player = player;
+        this.setMode(Mode.MOVING);
+        this.placeOnField();
+        System.out.println(this + " placed on cell #" + this.getCurrentCell().getX());
     }
 
-    @JsonProperty("nestHouse")
-    public String getNestHouse() {
-        return nestHouse;
-    }
-
-    @JsonProperty("nestHouse")
-    public void setNestHouse(String nestHouse) {
-        this.nestHouse = nestHouse;
-    }
-
-    @JsonProperty("skills")
-    public Skills getSkills() {
-        return skills;
-    }
-
-    @JsonProperty("skills")
-    public void setSkills(Skills skills) {
-        this.skills = skills;
-    }
-
-    @JsonProperty("currentEnemy")
     public Creature getCurrentEnemy() {
         return currentEnemy;
     }
 
-    @JsonProperty("currentEnemy")
-    public void setCurrentEnemy(Creature currentEnemy) {
-        this.currentEnemy = currentEnemy;
+    public Skills getSkills() {
+        return skills;
     }
 
-    @JsonProperty("currentCell")
-    public Cell getCurrentCell() {
+    public Battlefield.Cell getCurrentCell() {
         return currentCell;
     }
 
-    @JsonProperty("currentCell")
-    public void setCurrentCell(Cell currentCell) {
+    public int getPlayer() {
+        return player;
+    }
+
+    public void setCurrentEnemy() {
+        for (Creature creature : Game.getCreatures()) {
+            if (!creature.equals(this)) {
+                this.currentEnemy = creature;
+            }
+        }
+    }
+
+    public void setCurrentCell(Battlefield.Cell currentCell) {
         this.currentCell = currentCell;
     }
 
-    @JsonProperty("isAlive")
-    public Boolean getIsAlive() {
-        return isAlive;
+    static class Skills {
+
+        private Integer attackRange;
+
+        private Integer defence;
+
+        private String damage;
+
+        private Integer health;
+
+        private Integer speed;
+
+        public Integer getAttackRange() {
+            return attackRange;
+        }
+
+        public void setAttackRange(Integer attackRange) {
+            this.attackRange = attackRange;
+        }
+
+        public Integer getDefence() {
+            return defence;
+        }
+
+        public void setDefence(Integer defence) {
+            this.defence = defence;
+        }
+
+        public String getDamage() {
+            return damage;
+        }
+
+        public void setDamage(String damage) {
+            this.damage = damage;
+        }
+
+        public Integer getHealth() {
+            return health;
+        }
+
+        public void setHealth(Integer health) {
+            this.health = health;
+        }
+
+        public Integer getSpeed() {
+            return speed;
+        }
+
+        public void setSpeed(Integer speed) {
+            this.speed = speed;
+        }
     }
 
-    @JsonProperty("isAlive")
-    public void setIsAlive(Boolean isAlive) {
-        this.isAlive = isAlive;
-    }
-
-    @JsonProperty("isActive")
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    @JsonProperty("isActive")
-    public void activate() {
-        this.isActive = true;
-    }
-
-    @JsonIgnore
-    public void deactivate() {
-        this.isActive = false;
-    }
-
-    @JsonAnyGetter
-    public Map<String, Object> getAdditionalProperties() {
-        return this.additionalProperties;
-    }
-
-    @JsonAnySetter
-    public void setAdditionalProperty(String name, Object value) {
-        this.additionalProperties.put(name, value);
+    public void placeOnField() {
+        if (this.player == 1) {
+            this.setCurrentCell(Battlefield.getInstance().getCells().get(0));
+            this.getCurrentCell().setBusy();
+        } else if (this.player == 2) {
+            this.setCurrentCell(Battlefield.getInstance().getCells().get(25));
+            this.getCurrentCell().setBusy();
+        }
     }
 
     @Override
-    public int move() {
+    public void move() {
         int direction = 0;
-        if (this.player.getId() == 1) direction = 1;
-        if (this.player.getId() == 2) direction = -1;
-        int startPoint = this.getCurrentCell().getX();
-        int endPoint = startPoint + this.getSkills().getSpeed() * direction;
-        Cell busy = null;
-
-        for (int i = this.currentCell.getX() + direction; i != endPoint; i += direction) {
-            if (!BattleField.getInstance().getCells().get(i).isBusy()) {
-                this.getCurrentCell().setFree();
-                this.setCurrentCell(BattleField.getInstance().getCells().get(i));
-                this.getCurrentCell().setBusy();
-            } else {
-                System.out.println("Player " + this.player.getId() + ": " + this.getClass().getSimpleName() + ": It's time to fight!!");
-
-                break;
-            }
-
+        if (this.player == 1) {
+            direction = 1;
         }
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (this.player == 2) {
+            direction = -1;
         }
-        System.out.println("Player " + this.player.getId() + ": " + this.getClass().getSimpleName() + " has moved at cell #" + this.getCurrentCell().getX());
-        return 0;
-    }
-
-    public boolean enemyIsNear() {
-        int direction = 0;
-        if (this.player.getId() == 1) direction = 1;
-        if (this.player.getId() == 2) direction = -1;
         int currentPosition = this.getCurrentCell().getX();
-        int attackRange = this.getSkills().getAttackRange();
-        int currerntAttackRange = currentPosition + attackRange;
+        int currentMoveRange = currentPosition + this.getSkills().getSpeed() * direction;
+        int whereIsEnemy = whereIsEnemy();
+        int enemyDistance = Math.abs(whereIsEnemy - currentPosition);
 
-        for (int i = this.currentCell.getX() + direction; i != direction * currerntAttackRange; i += direction) {
-            if (BattleField.getInstance().getCells().get(i).isBusy()) {
-                for (Player player : BattleField.getInstance().getPlayers()) {
-                    for (Creature creature : player.getCreatures()) {
-                        if (creature.getCurrentCell().getX() == BattleField.getInstance().getCells().get(i).getX()) {
-                            this.setCurrentEnemy(creature);
-                            creature.setCurrentEnemy(this);
+        if (enemyDistance > this.getSkills().getSpeed() && enemyDistance > this.getSkills().getAttackRange()) {
+            this.getCurrentCell().setFree();
+            this.setCurrentCell(Battlefield.getInstance().getCells().get(currentMoveRange));
+            this.getCurrentCell().setBusy();
+            System.out.println(this + " has moved at sell #" + this.getCurrentCell().getX());
 
-                            return true;
-                        }
-                    }
-                }
-            } else return false;
+        } else if (enemyDistance > this.getSkills().getSpeed()) {
+            this.action();
+
+        } else if (whereIsEnemy - direction != this.getCurrentCell().getX()) {
+            this.getCurrentCell().setFree();
+            this.setCurrentCell(Battlefield.getInstance().getCells().get(whereIsEnemy - direction));
+            this.getCurrentCell().setBusy();
+            System.out.println(this + " has moved at sell #" + this.getCurrentCell().getX());
+            this.action();
+
+        } else {
+            this.action();
         }
-        return false;
+    }
+
+    int whereIsEnemy() {
+        for (Battlefield.Cell cell : Battlefield.getInstance().getCells()) {
+            if (cell.isBusy() && cell.getX() != this.getCurrentCell().getX()) {
+                return cell.getX();
+            }
+        }
+        return -1;
     }
 
     @Override
-    public int attack() {
-        int bonus = 0;
-        if(this instanceof Troglodyte) {
-            bonus = this.superSkillActivate();
-        }
-        int actualDamage = countDamagePoints(this.getSkills().getDamage() + bonus);
-        System.out.println("Player " + this.player.getId() + "'s " + this.getClass().getSimpleName() + ": Attack! " + actualDamage + " pts");
+    public void attack() {
+        int actualDamage = countDamagePoints();
+        System.out.println(this + ": Attack! " + actualDamage + " pts");
         this.getCurrentEnemy().takeDamage(actualDamage);
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return 0;
     }
 
-    private int countDamagePoints(String damage) {
+    private int countDamagePoints() {
         String text = this.getSkills().getDamage();
         ArrayList<Integer> numbers = new ArrayList<>();
         for (String part : text.split("\\-")) {
@@ -214,36 +189,50 @@ public abstract class Creature implements CanMove, CanFight, CanTakeDamage {
         }
         int a = numbers.get(0);
         int b = numbers.get(1);
-        int actualDamage = a + (int) (Math.random() * ((b - a) + 1));
-        return actualDamage;
+        return a + (int) (Math.random() * ((b - a) + 1));
     }
 
     @Override
-    public int takeDamage(int damage) {
+    public void takeDamage(int damage) {
         int bonus = 0;
-        if(this instanceof Minotaur) {
-            bonus = this.superSkillActivate();
-        }
-        if(this.getSkills().getDefence() != 0) {
+
+        if (this.getSkills().getDefence() != 0) {
             this.getSkills().setDefence(this.getSkills().getDefence() - damage);
         }
         this.getSkills().setHealth(this.getSkills().getHealth() + this.getSkills().getDefence() - damage + bonus);
-        if(this.getSkills().getHealth() <= 3) {
-            System.out.println("Player " + this.player.getId() + "'s " + this.getClass().getSimpleName() + ": Do you realy want to kill me?!");
+        if (this.getSkills().getHealth() <= 3) {
+            System.out.println(this + ": Do you really want to kill me?!");
         }
-        System.out.println("Player " + this.player.getId() + "'s " + this.getClass().getSimpleName() + ": I'm hurt!" + " (-" + damage + " health points)");
+        System.out.println(this + ": I'm hurt!" + " (-" + damage + " health points)");
         if (this.getSkills().getHealth() <= 0) {
             this.die();
         }
-        return 0;
     }
 
-    private void die() {
-        System.out.println("Player " + this.player.getId() + "'s " + this.getClass().getSimpleName() + ": I'm dead..");
-        this.setIsAlive(false);
-        OneDimensionGame.setFightStage(false);
+    @Override
+    public void die() {
+        System.out.println(this + ": I'm dead..");
+        for (Creature creature : Game.getCreatures()) {
+            if (creature.getCurrentEnemy() == this) {
+
+                creature.setMode(Mode.MOVING);
+            }
+        }
+        this.setMode(Mode.DEAD);
     }
 
+    @Override
+    public void superAction() {
+    }
 
-    protected abstract int superSkillActivate();
+    public int getRandom() {
+        return rnd.nextInt(50) + 1;
+    }
+
+    public void action() {
+        this.setCurrentEnemy();
+        this.setMode(Mode.FIGHTING);
+        if (getRandom() <= 25) this.attack();
+        else this.superAction();
+    }
 }

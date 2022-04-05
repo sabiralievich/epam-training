@@ -1,1 +1,0 @@
-package heroes.actions;public interface CanFight {    int attack();}

@@ -1,1 +1,20 @@
-package heroes.creatures;import java.util.Random;public class Minotaur extends Creature {    public Minotaur() {        System.out.println("Minotaur created!");    }    public int superSkillActivate() {        Random rnd = new Random();        int bonus = rnd.nextInt(this.getSkills().getSpecialSkill());        //this.getSkills().setHealth(this.getSkills().getHealth() + addHealth);        System.out.println("Player " + this.player.getId() + ": " + this.getClass().getSimpleName() + " has +"                + bonus + " of health points (Super defence)");        return bonus;    }}
+package heroes.creatures;
+
+public class Minotaur extends Creature {
+
+    public Minotaur(int speed, int health, int defence, String damage, int attackRange, int player) {
+        super(speed, health, defence, damage, attackRange, player);
+    }
+
+    @Override
+    public void superAction() {
+        int bonus = rnd.nextInt(4) + 1;
+        this.getSkills().setHealth(this.getSkills().getHealth() + bonus);
+        System.out.println(this + ": Super Skill Activated! I have + " + bonus + " health points");
+    }
+
+    @Override
+    public String toString() {
+        return "player #" + this.getPlayer() + "'s Minotaur";
+    }
+}

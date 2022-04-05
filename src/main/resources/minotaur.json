@@ -1,1 +1,0 @@
-{  "castle": "Dungeon",  "nestHouse":"Labyrinth",  "skills":  {"moveRange": 14,    "attackRange": 14,    "defence": 12,    "damage": "12-20",    "health": 50,    "speed": 6,    "specialSkill": 7  },  "currentEnemy":null,  "currentCell":null,  "isAlive": true,  "isActive":false}
